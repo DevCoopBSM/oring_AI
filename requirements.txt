@@ -2,6 +2,7 @@ fastapi
 uvicorn
 selenium
 webdriver-manager
+chromedriver-autoinstaller
 mysql-connector-python
 pandas
 scikit-learn

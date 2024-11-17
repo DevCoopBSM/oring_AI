@@ -4,10 +4,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 import re
+import chromedriver_autoinstaller  # 추가
 
 def get_current_people_count():
+    # 자동으로 맞는 ChromeDriver 버전을 설치합니다.
+    chromedriver_autoinstaller.install()
+
     # Chrome 옵션 설정 (브라우저를 보지 않고 실행, 성능 최적화)
     options = Options()
     options.add_argument("--headless")  # Headless 모드 (브라우저 창을 띄우지 않음)
@@ -17,8 +20,8 @@ def get_current_people_count():
     options.add_argument("--disable-extensions")  # 확장 프로그램 비활성화
     options.add_argument("--start-maximized")  # 최대화 모드로 시작
 
-    # 자동으로 ChromeDriver 설치 및 경로 설정
-    service = Service(ChromeDriverManager().install())
+    # `chromedriver_autoinstaller`가 설치한 ChromeDriver 경로 자동 설정
+    service = Service()
 
     # 웹 드라이버 시작
     driver = webdriver.Chrome(service=service, options=options)
@@ -48,4 +51,3 @@ def get_current_people_count():
     finally:
         # 드라이버 종료
         driver.quit()
-

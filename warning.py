@@ -91,3 +91,4 @@ def get_item_warning(user_code):
         if connection is not None and connection.is_connected():
             connection.close()
             logging.info("데이터베이스 연결 종료")
+            
