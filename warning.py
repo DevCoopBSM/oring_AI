@@ -4,9 +4,6 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
 
-# .env 파일에서 환경 변수 로드
-load_dotenv()
-
 # 데이터베이스 연결 설정
 USER = os.getenv('DB_USER')
 PASSWORD = os.getenv('DB_PASSWORD')
