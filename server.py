@@ -29,12 +29,12 @@ async def item_warning(request: UserCodeRequest):
 
 @app.get("/OringAI/peak_time/")
 async def peek_time():
-    # 크롤링을 통해 현재 인원 수 가져오기
-    current_people_count = get_current_people_count()
-    
+    # 현재 인원 수를 가져오기
+    current_people_count = await get_current_people_count()
+
     # 10명 이상이면 True, 아니면 False 반환
-    warning = current_people_count >= 10
-    
+    warning = current_people_count >= 3
+
     return {"warning": warning}
 
 # 프로그램 시작
