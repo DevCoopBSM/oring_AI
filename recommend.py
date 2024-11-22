@@ -25,7 +25,7 @@ def get_recommended_items(user_code):
             user=USER,
             password=PASSWORD,
             database=DATABASE,
-            ssl_disabled=True
+            ssl_disabled=False
         )
         
         if connection.is_connected():

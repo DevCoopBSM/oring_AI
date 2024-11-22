@@ -1,53 +1,46 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-import re
-import chromedriver_autoinstaller  # 추가
+import websocket
+import json
+import asyncio
 
-def get_current_people_count():
-    # 자동으로 맞는 ChromeDriver 버전을 설치합니다.
-    chromedriver_autoinstaller.install()
+# WebSocket을 통해 현재 사람 수를 가져오는 함수
+async def get_current_people_count():
+    url = "wss://occount.bsm-aripay.kr/ws/person_count"
 
-    # Chrome 옵션 설정 (브라우저를 보지 않고 실행, 성능 최적화)
-    options = Options()
-    options.add_argument("--headless")  # Headless 모드 (브라우저 창을 띄우지 않음)
-    options.add_argument("--disable-gpu")  # GPU 가속 비활성화
-    options.add_argument("--no-sandbox")  # 샌드박스 비활성화
-    options.add_argument("--disable-dev-shm-usage")  # /dev/shm 사용 안 함
-    options.add_argument("--disable-extensions")  # 확장 프로그램 비활성화
-    options.add_argument("--start-maximized")  # 최대화 모드로 시작
+    # WebSocket 연결을 위한 비동기 메시지 처리 함수
+    def on_message(ws, message):
+        try:
+            # 메시지를 JSON으로 파싱
+            data = json.loads(message)
+            avg_count = data.get("avg_count", 0)
 
-    # `chromedriver_autoinstaller`가 설치한 ChromeDriver 경로 자동 설정
-    service = Service()
+            # avg_count 값을 출력
+            print(f"현재 avg_count 값: {avg_count}")
+            ws.close()
+            return avg_count
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+            ws.close()
+            return 0
 
-    # 웹 드라이버 시작
-    driver = webdriver.Chrome(service=service, options=options)
-
-    # 웹 페이지 요청
-    url = "https://occount.bsm-aripay.kr/"
-    driver.get(url)
-
-    try:
-        # WebDriverWait을 사용하여 요소가 로드될 때까지 기다림 (최대 5초)
-        element = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'sc-ZVgAE.dQAtJj'))
-        )
-
-        # 0명 텍스트 추출
-        current_people_text = element.text
-        print(current_people_text)  # "0명"
+    def on_error(ws, error):
+        print(f"Error: {error}")
         
-        # 텍스트에서 숫자 추출 (정규식을 사용)
-        match = re.search(r'\d+', current_people_text)
-        if match:
-            current_people_count = int(match.group())  # 숫자로 변환
-            return current_people_count
-        else:
-            raise ValueError("숫자를 찾을 수 없습니다. 텍스트: {}".format(current_people_text))  # 에러 발생
+    def on_close(ws, close_status_code, close_msg):
+        print("WebSocket closed")
 
-    finally:
-        # 드라이버 종료
-        driver.quit()
+    def on_open(ws):
+        print("WebSocket connection opened")
+
+    # WebSocket 연결 설정
+    ws = websocket.WebSocketApp(
+        url,
+        on_message=on_message,
+        on_error=on_error,
+        on_close=on_close
+    )
+    
+    # 비동기적으로 WebSocket 연결을 실행
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(None, lambda: ws.run_forever())
+    
+    return result
